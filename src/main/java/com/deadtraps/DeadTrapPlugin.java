@@ -20,10 +20,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.OverlayPriority;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @PluginDescriptor(
@@ -32,12 +29,15 @@ import java.util.Map;
 public class DeadTrapPlugin extends Plugin {
 
 	private static final int LAID_BOX_IDENTIFIER = 9380;
-	private static final int CAUGHT_BOX_IDENTIFIER = 9383;
+	private static final int CAUGHT_GREY_BOX_IDENTIFIER = 9382;
+	private static final int CAUGHT_RED_BOX_IDENTIFIER = 9383;
 	private static final int CAUGHT_BLACK_BOX_IDENTIFIER = 721;
 	private static final int FAILED_BOX_IDENTIFIER = 9385;
 
+	private static final int GREY_CHIN_IDENTIFIER = 2910;
 	private static final int RED_CHIN_IDENTIFIER = 2911;
 	private static final int BLACK_CHIN_IDENTIFIER = 2912;
+	private static final List<Integer> chinIds = Arrays.asList(GREY_CHIN_IDENTIFIER, RED_CHIN_IDENTIFIER, BLACK_CHIN_IDENTIFIER);
 
 
 	private final Map<WorldPoint, HunterTrap> traps = new HashMap<>();
@@ -75,8 +75,9 @@ public class DeadTrapPlugin extends Plugin {
 
 		switch (object.getId()) {
 			case LAID_BOX_IDENTIFIER:
-			case CAUGHT_BOX_IDENTIFIER:
 			case FAILED_BOX_IDENTIFIER:
+			case CAUGHT_RED_BOX_IDENTIFIER:
+			case CAUGHT_GREY_BOX_IDENTIFIER:
 			case CAUGHT_BLACK_BOX_IDENTIFIER:
 				traps.put(trapLocation, new HunterTrap(object));
 				break;
@@ -97,7 +98,7 @@ public class DeadTrapPlugin extends Plugin {
 	@Subscribe
 	public void onNpcDespawned(NpcDespawned npcDespawned) {
 		NPC npc = npcDespawned.getNpc();
-		if (npc.getId() == RED_CHIN_IDENTIFIER || npc.getId() == BLACK_CHIN_IDENTIFIER) {
+		if (chinIds.contains(npc.getId())) {
 			if (chinTargets.get(npcDespawned.getActor()).size() >= 2) {
 				log.debug("removing chin which caused dead trap");
 				deadBoxes.addAll(chinTargets.get(npcDespawned.getActor()));
